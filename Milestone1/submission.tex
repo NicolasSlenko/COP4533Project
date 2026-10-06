@@ -118,7 +118,15 @@ Hence, the greedy algorithm is optimal. \hfill$\square$
 
 \subsubsection{Runtime Analysis}
 
-The loop makes $\lceil n/k\rceil$ jumps, each taking constant time. Copying the returned route takes the same order of time, so the function uses $\Theta(\lceil n/k\rceil)$ time and space. Its worst case is $\Theta(n)$ when $k=1$. Including reading all $n$ costs, the complete program takes $\Theta(n)$ time.
+Let $m=\lceil n/k\rceil$. The loop makes $m$ jumps with constant time work per jump. Copying the returned route takes $\Theta(m)$ time. Together, these give
+\[
+\Theta(m)+\Theta(m)=\Theta(m).
+\]
+The function's worst case is $\Theta(n)$ when $k=1$. Reading all $n$ costs makes the complete program's running time
+\[
+\Theta(n)+\Theta(m)=\Theta(n).
+\]
+The route uses $\Theta(m)$ extra space.
 
 \subsection{Question 1}
 
@@ -227,11 +235,13 @@ Every candidate starts at $0$, ends at $n$, and uses jumps of lengths $1$ throug
 
 \subsubsection{Runtime Analysis}
 
-Finding the peak takes $\Theta(n)$ time. There are at most $k+1$ candidates, each with $O(n/k+1)$ landings. Building, reversing, and summing each route takes time proportional to its length, so all candidates take
+Finding the peak takes $\Theta(n)$ time. There are at most $k+1$ candidates, each with $O(n/k+1)$ landings. Building, reversing, and summing each route takes time proportional to its length. Since $1\le k\le n$, all candidates take $O((k+1)(n/k+1))=O(n)$ time. Adding the peak scan gives
 \[
-O\bigl((k+1)(n/k+1)\bigr)=O(n),
+\Theta(n)+O\bigl((k+1)(n/k+1)\bigr)
+=\Theta(n)+O(n)
+=\Theta(n).
 \]
-since $1\le k\le n$. Including the peak scan, the total running time is $\Theta(n)$. The current and best routes use $O(n/k+1)$ extra space.
+The current and best routes use $O(n/k+1)$ extra space.
 
 \section{Experimental Comparative Study}
 

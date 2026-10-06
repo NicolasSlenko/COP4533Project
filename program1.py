@@ -14,11 +14,27 @@ def program1(n: int, k: int, costs: List[int]) -> Tuple[int, List[int]]:
     int:  minimum total energy cost
     List[int]: the indices of the visited panels in increasing order(1-indexed, including n and excluding 0)
     """
-    ############################
-    # Add your code here
-    ############################
+   
+    total_cost = 0
+    #Position 0 is the free starting dock, will remove it from the returned route
+    visited_panels = [0]
 
-    return 0, [1, 2, 3] # replace with your code
+    #In S1, costs never increase when going right, so the farthest reachable
+    #panel is among the cheapest reachable panels, even when costs tie
+
+    #The loop runs ⌈n/k⌉ times total, so its time is Θ(⌈n/k⌉). List appends take amortized constant time.
+    while visited_panels[-1] < n:
+
+        #ensure robot always ends on the last panel, as required
+        next_panel = min(n, visited_panels[-1] + k)
+        #subtract 1 to convert the panel number to its Python list index (1 based).
+        total_cost += costs[next_panel - 1]
+
+        #reuse visited_panels to keep track of last visited panel p
+        visited_panels.append(next_panel)
+
+                        
+    return total_cost, visited_panels[1:] #slice copies visited route, also Θ(⌈n/k⌉)
 
 
 if __name__ == '__main__':

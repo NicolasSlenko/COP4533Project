@@ -1,0 +1,194 @@
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+
+
+\pgfplotsset{compat=1.14}
+\begin{document}
+
+\title{COP4533 - Programming Assignment Milestone-1 Report}
+\date{}
+\maketitle
+{\color{red}
+This document provides a template for writing the report for \textsc{Milestone-1}.  
+Its purpose is to give you a clear base structure for your write-up, along with tips and suggestions on what to include in each section.  
+To illustrate the expected level of detail, the template uses the \textit{Interval Scheduling} problem as an example. 
+}
+
+\section{Team Members}
+{\color{red} If you are working as a team, list the names of all team members and briefly describe each member's contribution.}
+
+\section{Algorithm Design and Analysis}
+
+\subsection{Algorithm 1 (ProblemS1)}
+
+\subsubsection{Description}
+{\color{red} Describe your greedy algorithm for ProblemS1. Explain how it works step by step. Include pseudocode if appropriate.\\
+
+The purpose of the algorithm description is to communicate your approach as effectively as possible. A long narrative describing each line of your code is not ideal. Instead, aim for a concise, high-level summary of your algorithm, avoiding unnecessary implementation details. Including pseudocode can help clarify your approach, but keep it brief. It’s best to include only language-independent, relevant details. For example, $make\_tuple$ is specific to C++ and unnecessary for algorithm explanation. Strive for readability; good pseudocode balances clarity and conciseness while covering essential details. Try comparing with pseudo codes you come across in books. Here’s a helpful resource on writing effective pseudocode: 
+ \url{https://www.cs.cornell.edu/courses/cs482/2003su/handouts/pseudocode.pdf}\\
+
+Example using interval scheduling problem: \\}
+
+We can solve the interval scheduling problem using the following greedy strategy.
+
+\textbf{Greedy strategy:} Always choose the activity that finishes earliest among those compatible with the already chosen activities.  
+
+\textbf{Step by step example:}  
+Suppose we have the intervals (start, finish):  
+\[
+(1,4), (3,5), (0,6), (5,7), (3,9), (5,9), (6,10), (8,11), (8,12), (2,14), (12,16).
+\]  
+\begin{enumerate}
+  \item Select $(1,4)$, the earliest finishing interval.  
+  \item The next compatible interval is $(5,7)$.  
+  \item Then choose $(8,11)$.  
+  \item Finally, choose $(12,16)$.  
+\end{enumerate}
+
+The resulting set is $\{(1,4),(5,7),(8,11),(12,16)\}$ with 4 activities. 
+
+\begin{algorithm}[H]
+\caption{Interval Scheduling (Earliest Finish Time First)}\label{alg:interval}
+\begin{algorithmic}[1]
+\Procedure{IntervalScheduling}{$n, (s_1, f_1), (s_2, f_2), \ldots, (s_n, f_n)$}
+    \State Sort all jobs by finish times so that $f_1 \leq f_2 \leq \cdots \leq f_n$
+    \State $S \gets \emptyset$ \Comment{set of jobs selected}
+    \For{$j = 1$ to $n$}
+        \If{job $j$ is compatible with $S$}
+            \State $S \gets S \cup \{j\}$
+        \EndIf
+    \EndFor
+    \State \Return $S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Correctness Proof}
+{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemS1.\\
+
+Correctness proofs are typically the weakest part of most submissions. When reviewing your proof, ask yourself if it could "prove" an incorrect algorithm.\\
+
+Example using interval scheduling problem:\\}
+
+\noindent\textbf{Theorem.} 
+
+The earliest-finish-time-first greedy algorithm produces an optimal solution to the interval scheduling problem.
+
+\noindent\textbf{Proof.} [by contradiction]  
+
+Assume that the greedy algorithm is not optimal.
+
+\begin{enumerate}
+    \item Let $g_1, g_2, \ldots, g_k$ denote the set of jobs selected by the greedy algorithm.  
+    \item Let $o_1, o_2, \ldots, o_m$ denote the set of jobs in an optimal solution with maximal $r$ such that $o_i = g_i$ for all $i \leq r$.  
+    \item Consider the job at position $r+1$. By construction, the greedy choice $g_{r+1}$ is the earliest finishing job compatible with $g_1, g_2, \ldots, g_r$ and $o_1, o_2, \ldots, o_r$. Hence $finish\_time(g_{r+1}) \leq finish\_time(o_{r+1})$.  
+    \item Replace $o_{r+1}$ with $g_{r+1}$ to form a new solution. This replacement preserves feasibility because $g_{r+1}$ finishes no later than $o_{r+1}$ and is compatible with $o_1, \ldots, o_r$.  
+    \item The new solution has size at least as large as the optimal solution $O$, but it agrees with the greedy solution on $r+1$ jobs, contradicting the maximality of $r$.  
+\end{enumerate}
+
+Hence, the greedy algorithm is optimal.
+
+
+\subsubsection{Runtime Analysis}
+{\color{red} Analyze the time complexity of Algorithm 1. Make sure to include sufficient justification.\\\\ Example using interval scheduling problem:\\}
+
+Let $n$ be the number of jobs. The algorithm begins by sorting the jobs by their finish times, which requires $O(n \log n)$ time.  
+After sorting, the algorithm scans through the list once, adding each compatible job to the solution. This step takes $O(n)$ time.  
+
+Therefore, the overall running time is 
+\[
+O(n \log n) + O(n) = O(n \log n).
+\]
+
+Since the sorting step dominates, the greedy interval scheduling algorithm runs in $O(n \log n)$ time.
+
+\subsection{Question 1}
+{\color{red} Provide a new example input showing that Algorithm 1 does not always solve ProblemG. Explain why it fails on this input. Do not re-use the given example}
+
+\subsection{Question 2}
+{\color{red} Provide a new example input showing that Algorithm 1 does not always solve ProblemS2. Explain why it fails on this input. Do not re-use the given example}
+
+\subsection{Algorithm 2 (ProblemS2)}
+
+\subsubsection{Description}
+{\color{red} Describe your greedy algorithm for ProblemS2. Explain how it works step by step. Include pseudocode if appropriate.}
+
+\subsubsection{Correctness Proof}
+{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemS2.}
+
+\subsubsection{Runtime Analysis}
+{\color{red} Analyze the time complexity of Algorithm 2. Make sure to include sufficient
+justification.}
+
+\section{Experimental Comparative Study}
+
+{\color{red}The goal of the experimental study is to visualize the growth of the running time of the algorithms as the input size increases. Few things that will make the visualization more accurate.
+
+\begin{itemize}
+    \item Generate datasets with size $n$ that goes high enough. Small values of $n$ leads to an inaccurate visualization.
+    \item Pick uniformly distributed values of $n$. Non uniformly distributed values of n leads to a misleading visualization.
+    \item Use enough samples. Not enough samples of n also leads to an inaccurate visualization.
+\end{itemize}
+}
+
+\subsection{Experimental Setup}
+{\color{red} Describe how you generated random datasets, their sizes, and how you measured running times.
+
+You may include additional plots
+
+
+}
+
+\subsection{Plot 1}
+{\color{red} Insert your plot of running time for Algorithm 1 vs.\ input size. Explain the observed trend.}
+
+\begin{filecontents}{p1.dat}
+X   Points   Program1
+1   10000    0.016
+2   15000    0.024
+3   20000    0.030
+4   25000    0.036
+5   30000    0.043
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xticklabels from table={p1.dat}{Points},
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east}
+]
+\addplot[blue,thick,mark=square*] table [y=Program1,x=X]{p1.dat};
+\addlegendentry{Program 1}
+\end{axis}
+\end{tikzpicture}
+\caption{Example plot.}
+\label{plot1}
+\end{figure}
+
+\subsection{Plot 2}
+{\color{red} Insert your plot of running time for Algorithm 2 vs.\ input size. Explain the observed trend.}
+
+\subsection{Observations/Comments}
+{\color{red} Inlcude any additional observations or comments.}
+
+\section{Conclusion}
+{\color{red} Summarize your learning experience in Milestone 1. Reflect on design, analysis, experiments, and challenges.}
+
+\section{AI Use Disclosure}
+
+I used ChatGPT to review the grammar and organization of this report. I did not use it to design the algorithms, write the code, solve the problems, or perform the analysis. I reviewed all suggested wording changes and verified that the final report accurately reflects my own work.
+
+\end{document}
+

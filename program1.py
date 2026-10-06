@@ -27,7 +27,7 @@ def program1(n: int, k: int, costs: List[int]) -> Tuple[int, List[int]]:
 
         #ensure robot always ends on the last panel, as required
         next_panel = min(n, visited_panels[-1] + k)
-        #subtract 1 to convert the panel number to its Python list index (1 based).
+        #subtract 1 to convert the panel number to its Python list index (1 based)
         total_cost += costs[next_panel - 1]
 
         #reuse visited_panels to keep track of last visited panel p

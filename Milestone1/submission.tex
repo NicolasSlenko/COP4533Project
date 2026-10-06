@@ -1,0 +1,250 @@
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+
+\pgfplotsset{compat=1.14}
+
+\begin{document}
+
+\title{COP4533 Programming Assignment Milestone 1 Report}
+\date{}
+\maketitle
+
+\section{Team Members}
+
+\noindent\textbf{Nicolas Slenko}
+\begin{itemize}
+    \item Wrote the code for both algorithms.
+    \item Helped write the correctness proofs.
+    \item Tested the implementations.
+\end{itemize}
+
+\noindent\textbf{Zhicheng Li}
+\begin{itemize}
+    \item Wrote the correctness proofs for both algorithms.
+    \item Created the performance plots.
+\end{itemize}
+
+\section{Algorithm Design and Analysis}
+
+\subsection{Algorithm 1 (ProblemS1)}
+
+\subsubsection{Description}
+
+\noindent\textbf{Greedy strategy.} Start at $0$ and jump as far forward as possible without passing $n$. Costs never increase toward the right, so the farthest reachable panel costs no more than an earlier one. Record each landing and its cost until reaching $n$.
+
+\medskip
+\noindent\textbf{Example.} Let $n=8$, $k=3$, and
+\[
+c=[20,18,16,14,12,10,8,6].
+\]
+The route is $0\to3\to6\to8$, with total cost
+\[
+c_3+c_6+c_8=16+10+6=32.
+\]
+
+\begin{algorithm}[H]
+\caption{Greedy Route for ProblemS1}
+\label{alg:s1}
+\begin{algorithmic}[1]
+\Procedure{PanelRoute}{$n,k,[c_1,\ldots,c_n]$}
+    \State $S \gets [0]$ \Comment{route list starting at the dock}
+    \State $E \gets 0$ \Comment{total landing cost}
+    \While{the last element of $S$ is less than $n$}
+        \State $j \gets \min(n,\text{last element of }S+k)$
+        \State $E \gets E+c_j$
+        \State Append $j$ to $S$
+    \EndWhile
+    \State \Return $E$, $S$ excluding the first element of $S$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Correctness Proof}
+
+\noindent\textbf{Theorem.} Algorithm 1 returns a valid cheapest route for ProblemS1.
+
+\medskip
+\noindent\textbf{Proof.} [Greedy stays ahead, by contradiction]
+Assume that some valid route costs less than the greedy route.
+
+\begin{enumerate}
+    \item Let $G=\{g_1,\ldots,g_m\}$ be the greedy route and $O=\{o_1,\ldots,o_t\}$ an optimal route, with indices listed in increasing order. The routes have $m$ and $t$ landings, and $g_0=o_0=0$. By assumption, $O$ costs less than $G$.
+
+    \item Greedy jumps $k$ positions each time, shortening its final jump to land on $n$. Thus, $m=\lceil n/k\rceil$, and every jump has length between $1$ and $k$. The route is valid.
+
+    \item Each jump in $O$ covers at most $k$ positions. Reaching $n$ requires $n\le tk$, so
+    \[
+    t\ge\lceil n/k\rceil=m.
+    \]
+    Thus, $O$ has at least as many landings as $G$.
+
+    \item Let $r$ be the jump number, with $1\le r\le m$. After $r$ jumps, $O$ cannot pass $rk$ or $n$, while greedy reaches $g_r=\min(rk,n)$. Therefore,
+    \[
+    o_r\le\min(rk,n)=g_r.
+    \]
+    Greedy stays at least as far right after the same number of jumps.
+
+    \item Costs never increase toward the right, so
+    \[
+    c_{g_r}\le c_{o_r}, \qquad 1\le r\le m.
+    \]
+
+    \item Adding these inequalities compares $G$ with the first $m$ landings of $O$:
+    \[
+    \sum_{r=1}^{m}c_{g_r}\le\sum_{r=1}^{m}c_{o_r}.
+    \]
+
+    \item Any remaining landings in $O$ have positive cost, so
+    \[
+    \sum_{r=1}^{m}c_{o_r}\le\sum_{r=1}^{t}c_{o_r}.
+    \]
+
+    \item Combining the two comparisons gives
+    \[
+    \sum_{r=1}^{m}c_{g_r}\le\sum_{r=1}^{t}c_{o_r}.
+    \]
+    This contradicts the assumption that $O$ costs less than $G$.
+\end{enumerate}
+
+Hence, the greedy algorithm is optimal. \hfill$\square$
+
+\subsubsection{Runtime Analysis}
+
+The loop makes $\lceil n/k\rceil$ jumps, each taking constant time. Copying the returned route takes the same order of time, so the function uses $\Theta(\lceil n/k\rceil)$ time and space. Its worst case is $\Theta(n)$ when $k=1$. Including reading all $n$ costs, the complete program takes $\Theta(n)$ time.
+
+\subsection{Question 1}
+
+Let $n=6$, $k=2$, and $c=[7,12,2,11,1,3]$. Algorithm 1 takes $0\to2\to4\to6$, costing $12+11+3=26$. The route $0\to1\to3\to5\to6$ costs $7+2+1+3=13$. Its jumps have lengths $1,2,2,1$, so it is valid and cheaper. Algorithm 1 fails because the farthest reachable panel need not be cheaper in ProblemG.
+
+\subsection{Question 2}
+
+Let $n=5$, $k=3$, and $c=[1,4,20,6,2]$. These costs rise to a unique peak at $p=3$ and then fall, satisfying ProblemS2. Algorithm 1 takes $0\to3\to5$, costing $20+2=22$. The route $0\to2\to5$ costs $4+2=6$. Its jumps have lengths $2,3$, so it is valid and cheaper. It skips the expensive peak using the same number of jumps.
+
+\subsection{Algorithm 2 (ProblemS2)}
+
+\subsubsection{Description}
+
+\noindent\textbf{Greedy strategy.} Let $p$ be the peak panel. Try each jump $a\to a+k$ with $a\le p\le a+k$. Build the left side backward from $a$ in jumps of $k$ toward $0$, then reverse it. Build the right side by jumping as far forward as possible from $a+k$ to $n$. Sum each complete route's cost and keep the cheapest.
+
+Costs rise before the peak and fall after it, allowing ties away from the peak. Backward jumps favor cheaper panels on the left, and forward jumps favor cheaper panels on the right. The crossing can start or end at the peak.
+
+\medskip
+\noindent\textbf{Example.} Let $n=10$, $k=4$, and
+\[
+c=[1,2,4,9,12,10,6,4,3,1].
+\]
+The peak is $p=5$. The possible crossing jumps and completed routes are:
+\begin{center}
+\begin{tabular}{ccl}
+\textbf{Crossing} & \textbf{Visited panels} & \textbf{Energy} \\
+\hline
+$1\to5$ & $[1,5,9,10]$ & $1+12+3+1=17$ \\
+$2\to6$ & $[2,6,10]$ & $2+10+1=13$ \\
+$3\to7$ & $[3,7,10]$ & $4+6+1=11$ \\
+$4\to8$ & $[4,8,10]$ & $9+4+1=14$ \\
+$5\to9$ & $[1,5,9,10]$ & $1+12+3+1=17$
+\end{tabular}
+\end{center}
+The algorithm returns $[3,7,10]$ with total energy $11$.
+
+\begin{algorithm}[H]
+\caption{Greedy Completions for ProblemS2}
+\label{alg:s2}
+\begin{algorithmic}[1]
+\Procedure{PeakRoute}{$n,k,[c_1,\ldots,c_n]$}
+    \State $p\gets$ index of the maximum landing cost
+    \State $E^*\gets\infty$, $S^*\gets []$ \Comment{best cost and route found so far}
+    \For{$a=\max(0,p-k)$ to $\min(p,n-k)$}
+        \State $S\gets []$, $E\gets0$ \Comment{candidate route and its energy cost}
+        \State $j\gets a$
+        \While{$j>0$}
+            \State Append $j$ to $S$
+            \State $j\gets\max(0,j-k)$
+        \EndWhile
+        \State Reverse $S$
+        \State $j\gets a+k$
+        \State Append $j$ to $S$
+        \While{$j\ne n$}
+            \State $j\gets\min(n,j+k)$
+            \State Append $j$ to $S$
+        \EndWhile
+        \For{each panel $i$ in $S$}
+            \State $E\gets E+c_i$
+        \EndFor
+        \If{$E<E^*$}
+            \State $E^*\gets E$, $S^*\gets S$
+        \EndIf
+    \EndFor
+    \State \Return $E^*,S^*$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Correctness Proof}
+
+\noindent\textbf{Theorem.} Algorithm 2 returns a valid cheapest route for ProblemS2.
+
+\medskip
+\noindent\textbf{Proof.} [Direct proof]
+Let $G=\{g_1,\ldots,g_m\}$ be the returned route and $O=\{o_1,\ldots,o_t\}$ any valid route, with indices listed in increasing order and $o_0=0$. Let $E(G)$ and $E(O)$ denote their energy costs.
+
+\begin{enumerate}
+    \item Let $j$ be the first landing number with $o_j\ge p$, and set $x=o_{j-1}$, $y=o_j$. Since $O$ reaches $n$, this crossing exists, with $x<p\le y$ and $1\le y-x\le k$.
+
+    \item Let $L(a)$ denote the backward greedy completion cost from $a\le p$ to $0$, excluding $0$, and $R(b)$ the forward greedy completion cost from $b\ge p$ to $n$, including $b$.
+
+    \item Costs never increase on the right, so the S1 proof applies. Greedy stays at least as far right after the same number of jumps and uses the fewest jumps. Thus, $R(b)$ is the cheapest continuation.
+
+    \item Costs never decrease toward the peak on the left. Let $r$ count backward jumps from $a$. The positive greedy landing $a-rk$ lies no farther right than another route's corresponding landing, so it costs no more. Greedy uses the fewest landings, and extra landings have positive cost. Thus, $L(a)$ is cheapest, giving
+    \[
+    L(x)+R(y)\le E(O).
+    \]
+
+    \item Moving $a$ left moves each matched backward landing left and cannot add landings, so $L(a)$ cannot increase. Similarly, moving $b$ right moves each matched forward landing right and cannot add landings, so $R(b)$ cannot increase.
+
+    \item Set $x'=\max(0,y-k)$ and $y'=x'+k=\max(y,k)$. Then $x'\le x<p\le y\le y'\le n$, since $y-x\le k$ and $y,k\le n$. This crossing spans the peak and has length $k$.
+
+    \item By step 5, its greedy completions satisfy
+    \[
+    L(x')+R(y')\le L(x)+R(y)\le E(O).
+    \]
+
+    \item The algorithm checks this crossing because $\max(0,p-k)\le x'\le\min(p,n-k)$. It returns the cheapest candidate, so
+    \[
+    E(G)\le L(x')+R(y')\le E(O).
+    \]
+\end{enumerate}
+
+Every candidate starts at $0$, ends at $n$, and uses jumps of lengths $1$ through $k$. Since $O$ was arbitrary, $G$ is valid and costs no more than any valid route. Hence, the algorithm is optimal. \hfill$\square$
+
+\subsubsection{Runtime Analysis}
+
+Finding the peak takes $\Theta(n)$ time. There are at most $k+1$ candidates, each with $O(n/k+1)$ landings. Building, reversing, and summing each route takes time proportional to its length, so all candidates take
+\[
+O\bigl((k+1)(n/k+1)\bigr)=O(n),
+\]
+since $1\le k\le n$. Including the peak scan, the total running time is $\Theta(n)$. The current and best routes use $O(n/k+1)$ extra space.
+
+\section{Experimental Comparative Study}
+
+\subsection{Experimental Setup}
+
+\subsection{Plot 1}
+
+\subsection{Plot 2}
+
+\subsection{Observations/Comments}
+
+\section{Conclusion}
+
+\section{AI Use Disclosure}
+
+\end{document}

@@ -218,14 +218,23 @@ Let $G=\{g_1,\ldots,g_m\}$ be the returned route and $O=\{o_1,\ldots,o_t\}$ any 
 
     \item Moving $a$ left moves each matched backward landing left and cannot add landings, so $L(a)$ cannot increase. Similarly, moving $b$ right moves each matched forward landing right and cannot add landings, so $R(b)$ cannot increase.
 
-    \item Set $x'=\max(0,y-k)$ and $y'=x'+k=\max(y,k)$. Then $x'\le x<p\le y\le y'\le n$, since $y-x\le k$ and $y,k\le n$. This crossing spans the peak and has length $k$.
+    \item The original crossing may be shorter than $k$. Let $x'$ and $y'$ be the endpoints of a replacement crossing. To keep $y$ fixed and make the gap $k$, we would start at $y-k$. If this lies before $0$, we instead start at $0$ and end at $k$. Both cases are expressed by
+    \[
+    x'=\max(0,y-k),\qquad y'=x'+k=\max(y,k).
+    \]
+    The maximum keeps $x'$ inside the row. Since $y-x\le k$, we have $y-k\le x$, so $x'\le x$. Also, $y'\ge y$ and $y'\le n$, since $y,k\le n$. Thus, the endpoints move outward, the crossing still spans the peak, and $y'-x'=k$.
 
-    \item By step 5, its greedy completions satisfy
+    \item Moving the endpoints outward cannot increase either completion cost, as shown in step 5. Thus,
     \[
     L(x')+R(y')\le L(x)+R(y)\le E(O).
     \]
+    Any shorter crossing can therefore be replaced by one of length $k$ without increasing the complete route's cost. This justifies considering only crossings of length $k$.
 
-    \item The algorithm checks this crossing because $\max(0,p-k)\le x'\le\min(p,n-k)$. It returns the cheapest candidate, so
+    \item A candidate starting at $a$ must satisfy $a\ge0$ and $a+k\le n$ to stay inside the row. It must also satisfy $a\le p\le a+k$ to span the peak. Combining these conditions gives
+    \[
+    \max(0,p-k)\le a\le\min(p,n-k).
+    \]
+    The replacement crossing satisfies these conditions, so the algorithm checks it. Since it returns the cheapest candidate,
     \[
     E(G)\le L(x')+R(y')\le E(O).
     \]

@@ -30,9 +30,8 @@ def run_benchmarks():
     trials = 20
 
     # Warm-up run to eliminate cold-start cache/JIT overhead
-    dummy = generate_s1(1000)
-    program1(1000, k, dummy)
-    program2(1000, k, dummy)
+    program1(1000, k, generate_s1(1000))
+    program2(1000, k, generate_s2(1000))
 
     # Benchmark Program 1 (ProblemS1) across n
     p1_means = []
@@ -98,27 +97,27 @@ def run_benchmarks():
 
     # Print LaTeX filecontents tables
     print("% Table 1: Program 1 with Error Bars & Theoretical Fit")
-    print("\\begin{filecontents}{p1.dat}")
+    print("\\begin{filecontents*}[overwrite]{p1.dat}")
     print("X   Points   Mean          Std           Theoretical")
     for idx, (n, m, s) in enumerate(zip(n_values, p1_means, p1_stds), 1):
         theo = c1_fit * (n / k)
         print(f"{idx}   {n:<8} {m:.9f} {s:.9f} {theo:.9f}")
-    print("\\end{filecontents}\n")
+    print("\\end{filecontents*}\n")
 
     print("% Table 2: Program 2 with Error Bars & Theoretical Fit")
-    print("\\begin{filecontents}{p2.dat}")
+    print("\\begin{filecontents*}[overwrite]{p2.dat}")
     print("X   Points   Mean          Std           Theoretical")
     for idx, (n, m, s) in enumerate(zip(n_values, p2_means, p2_stds), 1):
         theo = c2_fit * n
         print(f"{idx}   {n:<8} {m:.9f} {s:.9f} {theo:.9f}")
-    print("\\end{filecontents}\n")
+    print("\\end{filecontents*}\n")
 
     print("% Table 3: Multi-variable Exploration (Varying k at n = 50,000)")
-    print("\\begin{filecontents}{varying_k.dat}")
+    print("\\begin{filecontents*}[overwrite]{varying_k.dat}")
     print("X   K        Program1      Program2")
     for idx, (kv, t1, t2) in enumerate(zip(k_values, p1_k_means, p2_k_means), 1):
         print(f"{idx}   {kv:<8} {t1:.9f} {t2:.9f}")
-    print("\\end{filecontents}")
+    print("\\end{filecontents*}")
 
 
 if __name__ == '__main__':

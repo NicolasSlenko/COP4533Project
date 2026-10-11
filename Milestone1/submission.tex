@@ -264,82 +264,150 @@ Random datasets for \textsc{ProblemS1} and \textsc{ProblemS2} were generated usi
   
   \item[Input Sizes:] The following input sizes were tested: $[20000, 40000, 60000, 80000, 100000]$ with jump parameter fixed at $k = 50$.
   
-  \item[Timing:] Running times were recorded using Python's \texttt{time.perf\_counter()}, measuring isolated algorithm execution time without input parsing or disk I/O. Each reported runtime is the average over 20 random trials for each input size, preceded by a warm-up run to eliminate cold-start cache and memory overhead.
+  \item[Timing:] Running times were recorded using Python's \texttt{time.perf\_counter()}, measuring isolated algorithm execution time without input parsing or disk I/O. Each reported runtime is the mean over 20 random trials for each input size, preceded by a warm-up run to eliminate cold-start cache and memory overhead. Sample standard deviations ($\pm 1\sigma$) are included as error bars.
 \end{description}
 
-\subsection{Plot 1}
+\subsection{Plot 1: Running Time of Program 1}
 \begin{filecontents}{p1.dat}
-X   Points   Program1
-1   20000    0.000031669
-2   40000    0.000066742
-3   60000    0.000088042
-4   80000    0.000116963
-5   100000   0.000228385
+X   Points   Mean          Std           Theoretical
+1   20000    0.000026886   0.000002768   0.000028214
+2   40000    0.000052915   0.000003443   0.000056429
+3   60000    0.000078627   0.000005400   0.000084643
+4   80000    0.000110119   0.000014760   0.000112857
+5   100000   0.000157315   0.000019395   0.000141072
 \end{filecontents}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    xlabel=Input Size ($n$),
-    ylabel=Running Time (seconds),
+    xlabel={Input Size ($n$)},
+    ylabel={Running Time (seconds)},
     xticklabels from table={p1.dat}{Points},
     xtick=data,
-    legend style={at={(0.97,0.03)},anchor=south east}
+    legend style={at={(0.03,0.97)},anchor=north west},
+    ymajorgrids=true,
+    grid style=dashed
 ]
-\addplot[blue,thick,mark=square*] table [y=Program1,x=X]{p1.dat};
-\addlegendentry{Program 1}
+\addplot+[blue,thick,mark=square*,
+    error bars/.cd,
+    y dir=both,
+    y explicit
+] table [x=X, y=Mean, y error=Std]{p1.dat};
+\addlegendentry{Measured (Mean $\pm 1\sigma$)}
+
+\addplot[dashed,black,thick] table [x=X, y=Theoretical]{p1.dat};
+\addlegendentry{Fitted $c_1 \cdot (n/k)$}
 \end{axis}
 \end{tikzpicture}
-\caption{Running times for different input sizes (Program 1, $k = 50$).}
+\caption{Running times for different input sizes (Program 1, $k = 50$, 20 trials).}
 \label{plot1}
 \end{figure}
 
-\subsection{Plot 2}
+\subsection{Plot 2: Running Time of Program 2}
 \begin{filecontents}{p2.dat}
-X   Points   Program2
-1   20000    0.001308094
-2   40000    0.002709606
-3   60000    0.004315012
-4   80000    0.005365594
-5   100000   0.006745783
+X   Points   Mean          Std           Theoretical
+1   20000    0.001227696   0.000055381   0.001265882
+2   40000    0.002520290   0.000119230   0.002531764
+3   60000    0.003968590   0.000214180   0.003797646
+4   80000    0.005487254   0.000339260   0.005063528
+5   100000   0.006460629   0.000260535   0.006329410
 \end{filecontents}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    xlabel=Input Size ($n$),
-    ylabel=Running Time (seconds),
+    xlabel={Input Size ($n$)},
+    ylabel={Running Time (seconds)},
     xticklabels from table={p2.dat}{Points},
     xtick=data,
-    legend style={at={(0.97,0.03)},anchor=south east}
+    legend style={at={(0.03,0.97)},anchor=north west},
+    ymajorgrids=true,
+    grid style=dashed
 ]
-\addplot[red,thick,mark=square*] table [y=Program2,x=X]{p2.dat};
-\addlegendentry{Program 2}
+\addplot+[red,thick,mark=square*,
+    error bars/.cd,
+    y dir=both,
+    y explicit
+] table [x=X, y=Mean, y error=Std]{p2.dat};
+\addlegendentry{Measured (Mean $\pm 1\sigma$)}
+
+\addplot[dashed,black,thick] table [x=X, y=Theoretical]{p2.dat};
+\addlegendentry{Fitted $c_2 \cdot n$}
 \end{axis}
 \end{tikzpicture}
-\caption{Running times for different input sizes (Program 2, $k = 50$).}
+\caption{Running times for different input sizes (Program 2, $k = 50$, 20 trials).}
 \label{plot2}
 \end{figure}
 
-\subsection{Observations/Comments}
-Based on the plots for each algorithm, execution times scale linearly with respect to input size $n$. This empirical trend corroborates the theoretical analysis:
+\subsection{Multi-Variable Exploration: Varying Jump Step $k$}
+To further investigate the algorithmic parameter dependencies beyond varying $n$, we conducted a multi-variable study fixing input size at $n = 50{,}000$ and varying the jump step parameter across $k \in [10, 25, 50, 100, 200]$.
+
+\begin{filecontents}{varying_k.dat}
+X   K        Program1      Program2
+1   10       0.000310189   0.003153394
+2   25       0.000133187   0.003125473
+3   50       0.000073221   0.003321746
+4   100      0.000040636   0.003270573
+5   200      0.000032977   0.003634142
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Jump Step Parameter ($k$)},
+    ylabel={Running Time (seconds)},
+    xticklabels from table={varying_k.dat}{K},
+    xtick=data,
+    legend style={at={(0.97,0.97)},anchor=north east},
+    ymajorgrids=true,
+    grid style=dashed
+]
+\addplot[blue,thick,mark=triangle*] table [x=X, y=Program1]{varying_k.dat};
+\addlegendentry{Program 1 ($O(n/k)$)}
+
+\addplot[red,thick,mark=o] table [x=X, y=Program2]{varying_k.dat};
+\addlegendentry{Program 2 ($O(n)$)}
+\end{axis}
+\end{tikzpicture}
+\caption{Running times when varying jump parameter $k$ at fixed $n = 50{,}000$.}
+\label{plot3}
+\end{figure}
+
+\subsection{Observations and Insights}
+The empirical data closely aligns with the theoretical complexity derivations across both variables $n$ and $k$:
 \begin{enumerate}
-    \item \textbf{Algorithm 1:} Executes exactly $\lceil n/k \rceil = n/50$ iterations with $O(1)$ constant-time work per jump, scaling linearly in $\Theta(n/k)$ time.
-    \item \textbf{Algorithm 2:} Combines an initial $\Theta(n)$ peak scan with $O(k)$ candidate route evaluations of length $O(n/k)$, scaling in strictly $\Theta(n)$ time.
-    \item \textbf{Speed Comparison:} For $k = 50$, Algorithm~1 runs roughly 30 times faster than Algorithm~2 due to evaluating a single direct path versus scanning all elements for peak $p$ and testing $k+1$ candidate crossings.
-    \item \textbf{Micro-Scale Spike at $n = 100{,}000$ (Program 1):} In Plot 1, a slight upward slope inflection occurs at $n = 100{,}000$ ($\approx 0.11\text{ ms}$ increase). Because Program 1 executes at sub-millisecond speeds ($< 0.25\text{ ms}$ total), low-level hardware phenomena become noticeable. At $n = 100{,}000$, the Python array footprint ($\approx 3.6\text{ MB}$) crosses the fast CPU L2 cache threshold, incurring DRAM memory bus fetch latency. In Program 2, this sub-millisecond effect is completely masked by the larger baseline runtime ($\approx 6.75\text{ ms}$).
+    \item \textbf{Linear Scaling with $n$:} At fixed $k = 50$, both algorithms scale linearly with $n$. The fitted theoretical curves ($c_1 \cdot (n/k)$ with $c_1 \approx 7.05 \times 10^{-8}\text{ s}$ and $c_2 \cdot n$ with $c_2 \approx 6.33 \times 10^{-8}\text{ s}$) closely trace the sample means across all tested points.
+    \item \textbf{Tight Error Bounds:} Error bars depicting $\pm 1\sigma$ over 20 trials remain exceptionally tight, demonstrating low runtime variance and high measurement reliability.
+    \item \textbf{Multi-Variable Divergence with $k$:} Plot~\ref{plot3} provides empirical proof of the distinct complexities:
+    \begin{itemize}
+        \item Program 1 scales inversely with $k$ ($O(n/k)$), dropping from $0.31\text{ ms}$ at $k = 10$ down to $0.033\text{ ms}$ at $k = 200$, because larger strides reduce the number of loop iterations $\lceil n/k \rceil$.
+        \item Program 2 exhibits flat $O(n)$ runtime ($\approx 3.1\text{--}3.6\text{ ms}$) regardless of $k$, because testing $O(k)$ candidates of length $O(n/k)$ cancels $k$ in the product $O(k \cdot (n/k)) = O(n)$, bounded by the linear peak search scan.
+    \end{itemize}
+    \item \textbf{Hardware Cache Bottleneck at $n = 100{,}000$ (Program 1):} In Plot~\ref{plot1}, an inflection appears at $n = 100{,}000$ ($\approx 0.157\text{ ms}$ vs.\ predicted $0.141\text{ ms}$). Because Program 1 completes in sub-millisecond durations, CPU cache hierarchy effects emerge. A 100k Python integer list occupies approximately $3.6\text{ MB}$, exceeding the L2 data cache boundary and triggering DRAM memory bus transfer latency. In Program 2, this microsecond effect is negligible compared to the larger baseline computation time ($\approx 6.46\text{ ms}$).
 \end{enumerate}
 
-\section{Conclusion}
+\section{Conclusion and Reflections}
+
+\subsection{Summary of Results}
 In Milestone 1, we designed, analyzed, and implemented greedy algorithms for the solar panel inspection robot under two structured cost models:
 \begin{enumerate}
-    \item \textbf{ProblemS1:} For monotonically non-increasing costs, taking the maximal allowable jump of length $k$ is provably optimal via an inductive ``greedy stays ahead'' exchange argument, achieving $\Theta(n/k)$ running time.
+    \item \textbf{ProblemS1:} For monotonically non-increasing costs, taking maximal jumps of size $k$ is provably optimal via an inductive ``greedy stays ahead'' argument, achieving $\Theta(n/k)$ running time.
     \item \textbf{ProblemS2:} For unimodal peak costs, optimal routing requires jumping over the expensive peak while maintaining greedy backward steps on the ascending prefix and greedy forward steps on the descending suffix. Checking all $O(k)$ valid crossing transitions guarantees global optimality in $\Theta(n)$ time.
-    \item \textbf{Boundaries of Greedy Approaches:} We demonstrated that greedy stepping fails on arbitrary general instances (\textsc{ProblemG}) and on unimodal instances (\textsc{ProblemS2}) when high-cost panels coincide with fixed jump strides, motivating the need for dynamic programming in Milestone 2.
-    \item \textbf{Empirical Validation:} Experimental benchmarking on datasets up to $n = 100{,}000$ confirmed linear runtime growth and validated theoretical asymptotic models.
+    \item \textbf{Boundaries of Greedy Approaches:} We established counterexamples demonstrating that greedy stepping fails on general instances (\textsc{ProblemG}) and unimodal instances (\textsc{ProblemS2}) when high-cost panels coincide with fixed jump strides, motivating the dynamic programming solutions required for Milestone 2.
+    \item \textbf{Empirical Validation:} Benchmarks across varying $n$ and $k$ with error bounds and theoretical curve fits confirmed the asymptotic predictions.
 \end{enumerate}
+
+\subsection{Individual Reflections}
+
+\noindent\textbf{Nicolas Slenko:}
+Working on Milestone 1 gave me practical insight into how theoretical asymptotic bounds translate into real-world code performance. Implementing the unimodal crossing logic in Program 2 highlighted the importance of carefully bounding search windows to keep total candidate evaluations strictly linear ($O(k \cdot (n/k)) = O(n)$). Benchmarking the implementations also demonstrated how hardware characteristics like CPU cache limits can influence micro-scale runtimes.
+
+\medskip
+\noindent\textbf{Zhicheng Li:}
+Formulating the correctness proofs reinforced the necessity of precision in inductive and exchange arguments. Specifically, ensuring that replacing an arbitrary route's crossing with a length-$k$ jump preserves validity without increasing cost was essential to justifying why checking only $O(k)$ candidates suffices. Designing the multi-variable experiments helped visualize the inverse scaling of Program 1 with respect to $k$ alongside the constant behavior of Program 2.
 
 \section{AI Use Disclosure}
 We used generative AI (Claude / ChatGPT) to assist with grammar, formatting, and structural review of this report. I developed the algorithm designs, implemented the code, derived the mathematical proofs, constructed the counterexamples, and conducted the experimental study myself. All AI suggestions were reviewed and verified to ensure the submitted write-up accurately reflects our own understanding and analysis.

@@ -21,15 +21,17 @@
 
 \noindent\textbf{Nicolas Slenko}
 \begin{itemize}
-    \item Wrote the code for both algorithms.
-    \item Helped write the correctness proofs.
-    \item Tested the implementations.
+    \item Wrote the code for both algorithms
+    \item Wrote the correctness proof for algorithm S1
+    \item Tested the implementations
+    \item Did first half of report
 \end{itemize}
 
 \noindent\textbf{Zhicheng Li}
 \begin{itemize}
-    \item Wrote the correctness proofs for both algorithms.
-    \item Created the performance plots.
+    \item Wrote the correctness proof for algorithm S2
+    \item Created the performance plots and conducted the experimental study
+    \item Did second half of report
 \end{itemize}
 
 \section{Algorithm Design and Analysis}
@@ -38,10 +40,10 @@
 
 \subsubsection{Description}
 
-\noindent\textbf{Greedy strategy.} Start at $0$ and jump as far forward as possible without passing $n$. Costs never increase toward the right, so the farthest reachable panel costs no more than an earlier one. Record each landing and its cost until reaching $n$.
+\noindent\textbf{Greedy strategy.} We start at $0$ and jump as far forward as possible without passing $n$. Costs never increase toward the right, so the farthest reachable panel costs no more than an earlier one. We record each landing and its cost until reaching $n$.
 
 \medskip
-\noindent\textbf{Example.} Let $n=8$, $k=3$, and
+\noindent\textbf{Example.} For instance, let $n=8$, $k=3$, and
 \[
 c=[20,18,16,14,12,10,8,6].
 \]
@@ -72,49 +74,28 @@ c_3+c_6+c_8=16+10+6=32.
 \noindent\textbf{Theorem.} Algorithm 1 returns a valid cheapest route for ProblemS1.
 
 \medskip
-\noindent\textbf{Proof.} [Greedy stays ahead, by contradiction]
-Assume that some valid route costs less than the greedy route.
+\noindent\textbf{Proof.} [By induction]
+Let $G=\{g_1,\ldots,g_m\}$ be the greedy route and let $O=\{o_1,\ldots,o_t\}$ be any valid route, with indices listed in increasing order. We initially set $g_0=o_0=0$.
 
 \begin{enumerate}
-    \item Let $G=\{g_1,\ldots,g_m\}$ be the greedy route and $O=\{o_1,\ldots,o_t\}$ an optimal route, with indices listed in increasing order. The routes have $m$ and $t$ landings, and $g_0=o_0=0$. By assumption, $O$ costs less than $G$.
+    \item Greedy jumps $k$ positions each time, shortening its final jump to land on $n$. Thus, $m=\lceil n/k\rceil$ and $g_r=\min(rk,n)$ for $0\le r\le m$. Every jump is legal, so $G$ is valid.
 
-    \item Greedy jumps $k$ positions each time, shortening its final jump to land on $n$. Thus, $m=\lceil n/k\rceil$, and every jump has length between $1$ and $k$. The route is valid.
+    \item The $t$ jumps in $O$ cover at most $tk$ positions. Since $O$ reaches $n$, $t\ge\lceil n/k\rceil=m$. Hence, $o_r$ exists for every $0\le r\le m$.
 
-    \item Each jump in $O$ covers at most $k$ positions. Reaching $n$ requires $n\le tk$, so
+    \item Let $r$ denote the number of jumps taken, so $o_r$ and $g_r$ are the panels reached after $r$ jumps. We prove by induction on $r$ that $o_r\le g_r$. The base case is $o_0=g_0=0$. For the inductive step, suppose $o_r\le g_r$ for some $r<m$. The next jump in $O$ has length at most $k$ and cannot pass $n$, so
     \[
-    t\ge\lceil n/k\rceil=m.
+    o_{r+1}\le\min(o_r+k,n)\le\min(g_r+k,n)=g_{r+1}.
     \]
-    Thus, $O$ has at least as many landings as $G$.
+    Therefore, the claim holds after every jump through $m$.
 
-    \item Let $r$ be the jump number, with $1\le r\le m$. After $r$ jumps, $O$ cannot pass $rk$ or $n$, while greedy reaches $g_r=\min(rk,n)$. Therefore,
+    \item Since costs never increase toward the right, $o_r\le g_r$ implies $c_{g_r}\le c_{o_r}$ for $1\le r\le m$. Summing gives
     \[
-    o_r\le\min(rk,n)=g_r.
+    \sum_{r=1}^{m}c_{g_r}\le\sum_{r=1}^{m}c_{o_r}\le\sum_{r=1}^{t}c_{o_r},
     \]
-    Greedy stays at least as far right after the same number of jumps.
-
-    \item Costs never increase toward the right, so
-    \[
-    c_{g_r}\le c_{o_r}, \qquad 1\le r\le m.
-    \]
-
-    \item Adding these inequalities compares $G$ with the first $m$ landings of $O$:
-    \[
-    \sum_{r=1}^{m}c_{g_r}\le\sum_{r=1}^{m}c_{o_r}.
-    \]
-
-    \item Any remaining landings in $O$ have positive cost, so
-    \[
-    \sum_{r=1}^{m}c_{o_r}\le\sum_{r=1}^{t}c_{o_r}.
-    \]
-
-    \item Combining the two comparisons gives
-    \[
-    \sum_{r=1}^{m}c_{g_r}\le\sum_{r=1}^{t}c_{o_r}.
-    \]
-    This contradicts the assumption that $O$ costs less than $G$.
+    where the last inequality follows because any extra landings in $O$ have positive cost.
 \end{enumerate}
 
-Hence, the greedy algorithm is optimal. \hfill$\square$
+Thus, $G$ is valid and costs no more than any valid route $O$. Hence, the greedy algorithm is optimal. \hfill$\square$
 
 \subsubsection{Runtime Analysis}
 
@@ -130,19 +111,19 @@ The route uses $\Theta(m)$ extra space.
 
 \subsection{Question 1}
 
-Let $n=6$, $k=2$, and $c=[7,12,2,11,1,3]$. Algorithm 1 takes $0\to2\to4\to6$, costing $12+11+3=26$. The route $0\to1\to3\to5\to6$ costs $7+2+1+3=13$. Its jumps have lengths $1,2,2,1$, so it is valid and cheaper. Algorithm 1 fails because the farthest reachable panel need not be cheaper in ProblemG.
+Let $n=6$, $k=2$, and $c=[7,12,2,11,1,3]$. Algorithm 1 takes $0\to2\to4\to6$, costing $12+11+3=26$. The route $0\to1\to3\to5\to6$ costs $7+2+1+3=13$. Its jumps have lengths $1,2,2,1$, so it is valid and cheaper. Algorithm 1 fails because the farthest reachable panel is not necessarily cheaper in ProblemG.
 
 \subsection{Question 2}
 
-Let $n=5$, $k=3$, and $c=[1,4,20,6,2]$. These costs rise to a unique peak at $p=3$ and then fall, satisfying ProblemS2. Algorithm 1 takes $0\to3\to5$, costing $20+2=22$. The route $0\to2\to5$ costs $4+2=6$. Its jumps have lengths $2,3$, so it is valid and cheaper. It skips the expensive peak using the same number of jumps.
+Let $n=5$, $k=3$, and $c=[1,4,20,6,2]$. These costs rise to a unique peak at $p=3$ and then fall, which satisfies the conditions of ProblemS2. Algorithm 1 takes $0\to3\to5$, costing $20+2=22$. The route $0\to2\to5$ costs $4+2=6$. Its jumps have lengths $2$ and $3$, so it is valid and cheaper. It skips the expensive peak using the same number of jumps.
 
 \subsection{Algorithm 2 (ProblemS2)}
 
 \subsubsection{Description}
 
-\noindent\textbf{Greedy strategy.} Let $p$ be the peak panel. Try each jump $a\to a+k$ with $a\le p\le a+k$. Build the left side backward from $a$ in jumps of $k$ toward $0$, then reverse it. Build the right side by jumping as far forward as possible from $a+k$ to $n$. Sum each complete route's cost and keep the cheapest.
+\noindent\textbf{Greedy strategy.} Let $p$ be the peak panel. We try each jump $a\to a+k$ with $a\le p\le a+k$. We build the left side backward from $a$ in jumps of $k$ toward $0$, then reverse it. We then build the right side by jumping as far forward as possible from $a+k$ to $n$ and then sum each complete route's cost and keep the cheapest.
 
-Costs rise before the peak and fall after it, allowing ties away from the peak. Backward jumps favor cheaper panels on the left, and forward jumps favor cheaper panels on the right. The crossing can start or end at the peak.
+Costs rise before the peak and fall after it, which allows ties away from the peak. Backward jumps favor cheaper panels on the left, and forward jumps favor cheaper panels on the right. The crossing has the option of starting or ending at the peak.
 
 \medskip
 \noindent\textbf{Example.} Let $n=10$, $k=4$, and
@@ -202,7 +183,7 @@ The algorithm returns $[3,7,10]$ with total energy $11$.
 
 \medskip
 \noindent\textbf{Proof.} [Direct proof]
-Let $G=\{g_1,\ldots,g_m\}$ be the returned route and $O=\{o_1,\ldots,o_t\}$ any valid route, with indices listed in increasing order and $o_0=0$. Let $E(G)$ and $E(O)$ denote their energy costs.
+Let $G=\{g_1,\ldots,g_m\}$ be the returned route and let $O=\{o_1,\ldots,o_t\}$ be any valid route, with the indices listed in increasing order and $o_0=0$. Let $E(G)$ and $E(O)$ denote their energy costs.
 
 \begin{enumerate}
     \item Let $j$ be the first landing number with $o_j\ge p$, and set $x=o_{j-1}$, $y=o_j$. Since $O$ reaches $n$, this crossing exists, with $x<p\le y$ and $1\le y-x\le k$.
@@ -255,37 +236,41 @@ The current and best routes use $O(n/k+1)$ extra space.
 \section{Experimental Comparative Study}
 
 \subsection{Experimental Setup}
-Random datasets for \textsc{ProblemS1} and \textsc{ProblemS2} were generated using Python's \texttt{random} module.
+We used Python version 3.12.14 on Windows with a random seed of $4533$. We generated the S1 and S2 datasets using Python's \texttt{random} module.
 
 \begin{description}
-  \item[ProblemS1:] Each panel cost was generated by sampling random integers uniformly from $[1, 100{,}000]$ and sorting in descending order, producing a non-increasing sequence ($c_i \ge c_{i+1}$).
-  
-  \item[ProblemS2:] Costs were generated to form a unimodal list with a single maximum peak. Starting from a random peak index $p \in [2, n-1]$, values increased randomly from left to peak, and decreased randomly from peak to end.
-  
-  \item[Input Sizes:] The following input sizes were tested: $[20000, 40000, 60000, 80000, 100000]$ with jump parameter fixed at $k = 50$.
-  
-  \item[Timing:] Running times were recorded using Python's \texttt{time.perf\_counter()}, measuring isolated algorithm execution time without input parsing or disk I/O. Each reported runtime is the mean over 20 random trials for each input size, preceded by a warm-up run to eliminate cold-start cache and memory overhead. Sample standard deviations ($\pm 1\sigma$) are included as error bars.
+    \item[ProblemS1:] We sampled $n$ costs uniformly from $[1,99999]$ and sorted them in decreasing order.
+    \item[ProblemS2:] We chose an interior peak position $p$ and a peak cost from $[2,99999]$. We sampled both sides below that cost, then sorted the left side in increasing order and the right side in decreasing order.
+    \item[Input sizes:] We tested $n\in\{20000,40000,60000,80000,99999\}$ with $k=50$. We checked every generated input against the problem restrictions and saved one input file per configuration.
+    \item[Timing:] We used \texttt{time.perf\_counter()} to measure only the algorithm function. We generated and validated inputs before timing. After a warmup call, we averaged a batch of 50 calls for Program 1 or 5 calls for Program 2. We reported the mean and sample standard deviation across 20 random inputs per configuration and saved all 400 trial timings.
+    \item[Fitted curves:] We fitted $T_1=c_1(n/k)$ and $T_2=c_2n$ by least squares with zero intercept for an expected comparison. The fitted constants came from the measurements.
 \end{description}
+
+\subsection{Correctness Testing}
+We tested 100,000 random inputs per program using seed $4533$. For S1, $1\le n\le14$. For S2, $3\le n\le14$ with a unique interior peak. Each test chose $1\le k\le n$. Ordinary costs were at most $30$, and S2 peak costs were at most $35$. We checked jump lengths, arrival at $n$, and the sum of landing costs. We also compared each returned cost with an independent $O(nk)$ dynamic programming reference. All tests and the assignment examples passed.
 
 \subsection{Plot 1: Running Time of Program 1}
 \begin{filecontents*}[overwrite]{p1.dat}
-X   Points   Mean          Std           Theoretical
-1   20000    0.000026886   0.000002768   0.000028214
-2   40000    0.000052915   0.000003443   0.000056429
-3   60000    0.000078627   0.000005400   0.000084643
-4   80000    0.000110119   0.000014760   0.000112857
-5   100000   0.000157315   0.000019395   0.000141072
+Points Mean Std Theoretical
+20000 0.000125746500 0.000083996304 0.000111659799
+40000 0.000260151500 0.000044339438 0.000223319599
+60000 0.000377957200 0.000237132510 0.000334979398
+80000 0.000418799600 0.000045493608 0.000446639198
+99999 0.000537228100 0.000119331905 0.000558293414
 \end{filecontents*}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
+    width=0.95\linewidth,
+    height=6cm,
     xlabel={Input Size ($n$)},
     ylabel={Running Time (seconds)},
-    xticklabels from table={p1.dat}{Points},
     xtick=data,
-    legend style={at={(0.03,0.97)},anchor=north west},
+    xticklabel style={rotate=25,anchor=east},
+    scaled x ticks=false,
+    legend style={at={(0.03,0.97)},anchor=north west,font=\small},
     ymajorgrids=true,
     grid style=dashed
 ]
@@ -293,36 +278,38 @@ X   Points   Mean          Std           Theoretical
     error bars/.cd,
     y dir=both,
     y explicit
-] table [x=X, y=Mean, y error=Std]{p1.dat};
-\addlegendentry{Measured (Mean $\pm 1\sigma$)}
-
-\addplot[dashed,black,thick] table [x=X, y=Theoretical]{p1.dat};
-\addlegendentry{Fitted $c_1 \cdot (n/k)$}
+] table [x=Points, y=Mean, y error=Std]{p1.dat};
+\addlegendentry{Mean $\pm 1\sigma$}
+\addplot[dashed,black,thick] table [x=Points, y=Theoretical]{p1.dat};
+\addlegendentry{Fitted $c_1(n/k)$}
 \end{axis}
 \end{tikzpicture}
-\caption{Running times for different input sizes (Program 1, $k = 50$, 20 trials).}
+\caption{Program 1 at $k=50$. Error bars show sample standard deviations over 20 trials.}
 \label{plot1}
 \end{figure}
 
 \subsection{Plot 2: Running Time of Program 2}
 \begin{filecontents*}[overwrite]{p2.dat}
-X   Points   Mean          Std           Theoretical
-1   20000    0.001227696   0.000055381   0.001265882
-2   40000    0.002520290   0.000119230   0.002531764
-3   60000    0.003968590   0.000214180   0.003797646
-4   80000    0.005487254   0.000339260   0.005063528
-5   100000   0.006460629   0.000260535   0.006329410
+Points Mean Std Theoretical
+20000 0.005341977000 0.001243777259 0.005649070221
+40000 0.010859155000 0.002084100901 0.011298140442
+60000 0.017816343000 0.004990234272 0.016947210662
+80000 0.021437614000 0.004479487202 0.022596280883
+99999 0.028887542000 0.003210963196 0.028245068650
 \end{filecontents*}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
+    width=0.95\linewidth,
+    height=6cm,
     xlabel={Input Size ($n$)},
     ylabel={Running Time (seconds)},
-    xticklabels from table={p2.dat}{Points},
     xtick=data,
-    legend style={at={(0.03,0.97)},anchor=north west},
+    xticklabel style={rotate=25,anchor=east},
+    scaled x ticks=false,
+    legend style={at={(0.03,0.97)},anchor=north west,font=\small},
     ymajorgrids=true,
     grid style=dashed
 ]
@@ -330,83 +317,104 @@ X   Points   Mean          Std           Theoretical
     error bars/.cd,
     y dir=both,
     y explicit
-] table [x=X, y=Mean, y error=Std]{p2.dat};
-\addlegendentry{Measured (Mean $\pm 1\sigma$)}
-
-\addplot[dashed,black,thick] table [x=X, y=Theoretical]{p2.dat};
-\addlegendentry{Fitted $c_2 \cdot n$}
+] table [x=Points, y=Mean, y error=Std]{p2.dat};
+\addlegendentry{Mean $\pm 1\sigma$}
+\addplot[dashed,black,thick] table [x=Points, y=Theoretical]{p2.dat};
+\addlegendentry{Fitted $c_2n$}
 \end{axis}
 \end{tikzpicture}
-\caption{Running times for different input sizes (Program 2, $k = 50$, 20 trials).}
+\caption{Program 2 at $k=50$. Error bars show sample standard deviations over 20 trials.}
 \label{plot2}
 \end{figure}
 
-\subsection{Multi-Variable Exploration: Varying Jump Step $k$}
-To further investigate the algorithmic parameter dependencies beyond varying $n$, we conducted a multi-variable study fixing input size at $n = 50{,}000$ and varying the jump step parameter across $k \in [10, 25, 50, 100, 200]$.
+\subsection{Varying the Maximum Jump}
+At $n=50000$, we tested $k\in\{10,25,50,100,200\}$. Within each of 20 trials, the same costs were reused across all five values of $k$ for each program.
 
 \begin{filecontents*}[overwrite]{varying_k.dat}
-X   K        Program1      Program2
-1   10       0.000310189   0.003153394
-2   25       0.000133187   0.003125473
-3   50       0.000073221   0.003321746
-4   100      0.000040636   0.003270573
-5   200      0.000032977   0.003634142
+K Program1 Std1 Program2 Std2
+10 0.001205837700 0.000036649758 0.013124372999 0.000724809601
+25 0.000487307300 0.000014822297 0.013062036003 0.002062743920
+50 0.000245970600 0.000006913818 0.013613604000 0.003477605390
+100 0.000124573400 0.000008793933 0.013112579999 0.002603657680
+200 0.000060034500 0.000002283022 0.013054997002 0.001518591539
 \end{filecontents*}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    xlabel={Jump Step Parameter ($k$)},
+    width=0.95\linewidth,
+    height=4.8cm,
+    title={Program 1},
+    xlabel={Maximum Jump ($k$)},
     ylabel={Running Time (seconds)},
-    xticklabels from table={varying_k.dat}{K},
-    xtick=data,
-    legend style={at={(0.97,0.97)},anchor=north east},
+    xtick={10,25,50,100,200},
     ymajorgrids=true,
     grid style=dashed
 ]
-\addplot[blue,thick,mark=triangle*] table [x=X, y=Program1]{varying_k.dat};
-\addlegendentry{Program 1 ($O(n/k)$)}
-
-\addplot[red,thick,mark=o] table [x=X, y=Program2]{varying_k.dat};
-\addlegendentry{Program 2 ($O(n)$)}
+\addplot+[blue,thick,mark=square*,
+    error bars/.cd,
+    y dir=both,
+    y explicit
+] table [x=K, y=Program1, y error=Std1]{varying_k.dat};
 \end{axis}
 \end{tikzpicture}
-\caption{Running times when varying jump parameter $k$ at fixed $n = 50{,}000$.}
+
+\medskip
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\linewidth,
+    height=4.8cm,
+    title={Program 2},
+    xlabel={Maximum Jump ($k$)},
+    ylabel={Running Time (seconds)},
+    xtick={10,25,50,100,200},
+    ymajorgrids=true,
+    grid style=dashed
+]
+\addplot+[red,thick,mark=square*,
+    error bars/.cd,
+    y dir=both,
+    y explicit
+] table [x=K, y=Program2, y error=Std2]{varying_k.dat};
+\end{axis}
+\end{tikzpicture}
+\caption{Runtime as $k$ changes at $n=50000$. The plots use separate vertical scales. Error bars show sample standard deviations over 20 trials.}
 \label{plot3}
 \end{figure}
 
-\subsection{Observations and Insights}
-The empirical data closely aligns with the theoretical complexity derivations across both variables $n$ and $k$:
+\subsection{Observations}
 \begin{enumerate}
-    \item \textbf{Linear Scaling with $n$:} At fixed $k = 50$, both algorithms scale linearly with $n$. The fitted theoretical curves ($c_1 \cdot (n/k)$ with $c_1 \approx 7.05 \times 10^{-8}\text{ s}$ and $c_2 \cdot n$ with $c_2 \approx 6.33 \times 10^{-8}\text{ s}$) closely trace the sample means across all tested points.
-    \item \textbf{Tight Error Bounds:} Error bars depicting $\pm 1\sigma$ over 20 trials remain exceptionally tight, demonstrating low runtime variance and high measurement reliability.
-    \item \textbf{Multi-Variable Divergence with $k$:} Plot~\ref{plot3} provides empirical proof of the distinct complexities:
-    \begin{itemize}
-        \item Program 1 scales inversely with $k$ ($O(n/k)$), dropping from $0.31\text{ ms}$ at $k = 10$ down to $0.033\text{ ms}$ at $k = 200$, because larger strides reduce the number of loop iterations $\lceil n/k \rceil$.
-        \item Program 2 exhibits flat $O(n)$ runtime ($\approx 3.1\text{--}3.6\text{ ms}$) regardless of $k$, because testing $O(k)$ candidates of length $O(n/k)$ cancels $k$ in the product $O(k \cdot (n/k)) = O(n)$, bounded by the linear peak search scan.
-    \end{itemize}
-    \item \textbf{Measurement Noise at Small Scales (Program 1):} In Plot~\ref{plot1}, the mean at $n = 100{,}000$ ($\approx 0.157\text{ ms}$) lies slightly above the fitted value ($0.141\text{ ms}$). This gap is within about one standard deviation ($0.019\text{ ms}$), so it reflects timing noise rather than a change in growth rate. Because Program 1 finishes in well under a millisecond, small system effects such as scheduling and timer resolution are a noticeable fraction of each measurement. Program 2 runs for several milliseconds, so the same noise is relatively smaller there.
+    \item With $k=50$, both of the measured functions grow roughly linearly with $n$.
+    \item The error bars show the spread across trials. Some measurements vary noticeably, especially Program 1 at small runtimes. 
+    \item As $k$ increases from $10$ to $200$, Program 1 drops from about $1.21$ ms to $0.060$ ms. Larger jumps reduce its $\lceil n/k\rceil$ loop iterations.
+    \item Over the tested values of $k$, Program 2 stays in the  $13$ ms range. This supports the analysis that $O(k)$ candidates with $O(n/k)$ landings give $O(n)$ work in this range, plus the $\Theta(n)$ peak scan.
 \end{enumerate}
 
 \section{Conclusion}
 
 \subsection{Summary of Results}
-We designed, proved, and implemented greedy algorithms for both special cases. For \textsc{ProblemS1}, jumping the full $k$ positions each time is optimal. For \textsc{ProblemS2}, trying every length-$k$ jump across the peak, completed greedily on both sides, is optimal. Both programs run in $\Theta(n)$ time. The counterexamples for Questions 1 and 2 show that the S1 greedy rule fails once a far panel can cost more than a nearer one, which motivates the dynamic programming algorithms of Milestone 2. The benchmarks matched the predicted growth in both $n$ and $k$.
+We designed, proved, and implemented greedy algorithms for both special cases. For \textsc{ProblemS1}, jumping as far as possible without passing $n$ is optimal. For \textsc{ProblemS2}, trying every crossing of length $k$ across the peak, completed greedily on both sides, is optimal. Both complete programs run in $\Theta(n)$ time. The counterexamples show why the S1 rule fails on the other cost models. The experiments support the predicted growth in $n$ and $k$.
 
-\subsection{Program 1}
-Program 1 was straightforward to implement: a single loop that advances $k$ positions and adds each landing cost. The only care needed was capping the final jump at $n$ so the robot lands exactly on the last panel. Most of the effort went into the proof, specifically showing that greedy's $r$-th landing is never left of any other route's $r$-th landing, and that greedy uses the fewest landings.
 
-\subsection{Program 2}
-Program 2 was harder. The main challenges were:
-\begin{itemize}
-    \item \textbf{Bounding the candidates.} Restricting crossings to $\max(0,p-k)\le a\le\min(p,n-k)$ keeps every candidate inside the row and makes the total work $O((k+1)(n/k+1))=O(n)$.
-    \item \textbf{Building the left side.} Jumping backward from $a$ toward $0$ gives the cheapest prefix, but it produces panels in decreasing order, so the list must be reversed before the crossing and right side are appended.
-    \item \textbf{Edge cases.} Crossings that start at the dock ($a=0$), start or end on the peak, and the case $k=n$ all needed checking. We tested the program against a brute-force solution on many small random inputs to confirm these cases.
-\end{itemize}
-The proof also required care: it had to state exactly which crossing replaces a shorter one and show that moving its endpoints outward cannot increase either side's cost.
+\subsection{Individual Reflections}
+\medskip
+\noindent Nicolas:
+
+Overall, I found this part of the project to be a great learning experience although I found it challenging. Milestone 1 gave me a better understanding of how to turn a greedy idea into an algorithm and justify why it works. Program 1 was straightforward to implement, but the proof took a lot more work and thinking than I thought it would. 
+
+On the other hand, Program 2 was a lot more challenging because it involved choosing a crossing near the peak and building the route on both sides. The main implementation details were reversing the left side and handling crossings near $0$ and $n$. I also thought it was cool to reuse the S1 part of the proof for S2. Lastly, the experiments also showed how the two algorithms respond differently to larger jumps, even though both complete programs have linear running time.
+
+This was also a great experience to sharpen up my latex syntax knowledge for the proofs and report.
+
+\medskip
+\noindent Zhicheng:
+
+For me, the most valuable part of Milestone 1 was learning how to make the correctness arguments precise. For Program 1, comparing the routes after the same number of jumps made the greedy stays ahead argument easier to follow. However, Program 2 required more care because we had to justify replacing a shorter crossing with one of length $k$. Stating the replacement explicitly and showing that its cost could not increase was the main challenge in my opinion.
+
+Conducting the experimental study helped me connect the analysis to the programs' actual behavior. At fixed $k$, both runtimes grew roughly linearly with $n$. Increasing $k$ made Program 1 faster, while Program 2 stayed roughly flat because more candidates were balanced by shorter routes. The variation between timings also showed me why repeated measurements and error bars were useful. The experiments also showed me that programs with the same overall time complexity can still differ noticeably in speed
 
 \section{AI Use Disclosure}
-We used generative AI (Claude / ChatGPT) to assist with grammar, formatting, and structural review of this report. We developed the algorithm designs, implemented the code, derived the mathematical proofs, constructed the counterexamples, and conducted the experimental study ourselves. All AI suggestions were reviewed and verified to ensure the submitted write-up accurately reflects our own understanding and analysis.
+We used generative AI (Claude and ChatGPT) to assist with grammar, formatting, and to conduct a structural review of the report. However, we developed the algorithm designs, implemented the code, derived the mathematical proofs, constructed the counterexamples, and conducted the experimental study ourselves. 
 
 \end{document}
